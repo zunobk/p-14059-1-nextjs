@@ -1,10 +1,10 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-export default function Page({ params }: { params: Promise<{ id: number }> }) {
-  const { id } = use(params);
-
+export default function Page() {
+  const { id } = useParams<{ id: string }>();
   const [post, setPost] = useState<{
     id: number;
     title: string;
