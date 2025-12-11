@@ -9,7 +9,8 @@ export default function Page() {
   const [posts, setPosts] = useState<PostDto[]>([]);
 
   useEffect(() => {
-    apiFetch(`/api/v1/posts`).then(setPosts);
+    apiFetch(`/api/v1/posts`)
+      .then(setPosts);
   }, []);
 
   return (
@@ -25,6 +26,10 @@ export default function Page() {
           </li>
         ))}
       </ul>
+
+      <div>
+        <Link href="/posts/write">글쓰기</Link>
+      </div>
     </>
   );
 }
