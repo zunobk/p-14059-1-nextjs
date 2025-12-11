@@ -1,8 +1,11 @@
 "use client";
 
 import { apiFetch } from "@/lib/backend/client";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+  const router = useRouter();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -38,6 +41,7 @@ export default function Page() {
     })
       .then((data) => {
         alert(data.msg);
+        router.push(`/posts/${data.data.id}`);
       });
   };
 
