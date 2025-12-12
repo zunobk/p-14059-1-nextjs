@@ -16,7 +16,7 @@ export const apiFetch = (url: string, options?: RequestInit) => {
       return res
         .json()
         .then((errorData) => {
-          throw new Error(errorData.msg);
+          throw errorData;
         });
     }
 
