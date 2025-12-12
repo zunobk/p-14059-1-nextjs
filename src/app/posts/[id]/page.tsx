@@ -6,22 +6,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
 
-export default function Page({ params }: { params: Promise<{ id: number }> }) {
-  const { id } = use(params);
-  const router = useRouter();
-
-  const [post, setPost] = useState<PostWithContentDto | null>(null);
-  const [postComments, setPostComments] = useState<PostCommentDto[] | null>(null);
-
-  const deletePost = (id: number) => {
-    apiFetch(`/api/v1/posts/${id}`, {
-      method: "DELETE",
-    }).then((data) => {
-      alert(data.msg);
-      router.replace("/posts");
-    });
-  };
-
+function PostCommentWriteAndList({
+  id,
+  postComments,
+  setPostComments,
+}: {
+  id: number;
+  postComments: PostCommentDto[] | null;
+  setPostComments: (postComments: PostCommentDto[]) => void;
+}) {
   const deleteComment = (id: number, commentId: number) => {
     apiFetch(`/api/v1/posts/${id}/comments/${commentId}`, {
       method: "DELETE",
@@ -54,7 +47,7 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
     }
 
     if (contentTextarea.value.length < 2) {
-      alert("댓글 내용은 2글자 이상 입력해주세요.");
+      alert("댓글 내용을 2자 이상 입력해주세요.");
       contentTextarea.focus();
       return;
     }
@@ -71,6 +64,71 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
       if (postComments == null) return;
 
       setPostComments([...postComments, data.data]);
+    });
+  };
+
+  return (
+    <>
+      <h2>댓글 작성</h2>
+
+      <form className="p-2" onSubmit={handleCommentWriteFormSubmit}>
+        <textarea
+          className="border p-2 rounded"
+          name="content"
+          placeholder="댓글 내용"
+          maxLength={100}
+          rows={5}
+        />
+        <button className="p-2 rounded border" type="submit">
+          작성
+        </button>
+      </form>
+
+      <h2>댓글 목록</h2>
+
+      {postComments == null && <div>댓글 로딩중...</div>}
+
+      {postComments != null && postComments.length == 0 && (
+        <div>댓글이 없습니다.</div>
+      )}
+
+      {postComments != null && postComments.length > 0 && (
+        <ul>
+          {postComments.map((comment) => (
+            <li key={comment.id}>
+              {comment.id} : {comment.content}
+              <button
+                className="p-2 rounded border"
+                onClick={() =>
+                  confirm(`${comment.id}번 댓글을 정말로 삭제하시겠습니까?`) &&
+                  deleteComment(id, comment.id)
+                }
+              >
+                삭제
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+}
+
+export default function Page({ params }: { params: Promise<{ id: number }> }) {
+  const { id } = use(params);
+  const router = useRouter();
+
+  const [post, setPost] = useState<PostWithContentDto | null>(null);
+  const [postComments, setPostComments] = useState<PostCommentDto[] | null>(
+    null
+  );
+
+  const deletePost = (id: number) => {
+    apiFetch(`/api/v1/posts/${id}`, {
+      method: "DELETE",
+    }).then((data) => {
+      alert(data.msg);
+      router.replace("/posts");
     });
   };
 
@@ -113,46 +171,11 @@ export default function Page({ params }: { params: Promise<{ id: number }> }) {
         </Link>
       </div>
 
-      <h2>댓글 작성</h2>
-
-      <form className="p-2" onSubmit={handleCommentWriteFormSubmit}>
-        <textarea
-          className="border p-2 rounded"
-          name="content"
-          placeholder="댓글 내용"
-          maxLength={100}
-        />
-        <button className="p-2 rounded border" type="submit">
-          작성
-        </button>
-      </form>
-
-      <h2>댓글 목록</h2>
-
-      {postComments == null && <div>댓글 로딩중...</div>}
-
-      {postComments != null && postComments.length == 0 && (
-        <div>댓글이 없습니다.</div>
-      )}
-
-      {postComments != null && postComments.length > 0 && (
-        <ul>
-          {postComments.map((comment) => (
-            <li key={comment.id}>
-              {comment.id} : {comment.content}
-              <button
-                className="p-2 rounded border"
-                onClick={() =>
-                  confirm(`${comment.id}번 댓글을 정말로 삭제하시겠습니까?`) &&
-                  deleteComment(id, comment.id)
-                }
-              >
-                삭제
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <PostCommentWriteAndList
+        id={id}
+        postComments={postComments}
+        setPostComments={setPostComments}
+      />
     </>
   );
 }
